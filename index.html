@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>区域K4业务梳理报告</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --primary: #0052D9;
+  --primary-light: #E7F1FF;
+  --secondary: #00A870;
+  --accent: #ED7B2F;
+  --danger: #E34D59;
+  --warning: #E37318;
+  --bg: #F5F7FA;
+  --card-bg: #FFFFFF;
+  --text-1: #181818;
+  --text-2: #4A5568;
+  --text-3: #888888;
+  --border: #E7E7E7;
+  --shadow: 0 2px 12px rgba(0,0,0,0.06);
+  --shadow-hover: 0 8px 24px rgba(0,82,217,0.12);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: var(--bg);
+  color: var(--text-1);
+  line-height: 1.6;
+}
+.container { max-width: 1280px; margin: 0 auto; padding: 32px 24px; }
+
+/* 顶部 Hero */
+.hero {
+  background: linear-gradient(135deg, #0052D9 0%, #5680E9 100%);
+  border-radius: 16px;
+  padding: 48px 40px;
+  color: white;
+  margin-bottom: 32px;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: "";
+  position: absolute;
+  right: -80px; top: -80px;
+  width: 320px; height: 320px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 50%;
+}
+.hero::after {
+  content: "";
+  position: absolute;
+  right: 80px; bottom: -120px;
+  width: 240px; height: 240px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 50%;
+}
+.hero-tag {
+  display: inline-block;
+  background: rgba(255,255,255,0.2);
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  margin-bottom: 16px;
+  letter-spacing: 1px;
+}
+.hero h1 { font-size: 36px; margin-bottom: 12px; font-weight: 700; }
+.hero p { font-size: 16px; opacity: 0.92; max-width: 680px; }
+.hero-meta {
+  display: flex; gap: 32px; margin-top: 24px;
+  position: relative; z-index: 2;
+}
+.hero-meta-item {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 14px; opacity: 0.9;
+}
+.hero-meta-item .icon { font-size: 16px; }
+
+/* KPI 卡片组 */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.kpi-card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: var(--shadow);
+  transition: all 0.3s;
+  border-top: 3px solid var(--primary);
+}
+.kpi-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); }
+.kpi-card.green { border-top-color: var(--secondary); }
+.kpi-card.orange { border-top-color: var(--accent); }
+.kpi-card.red { border-top-color: var(--danger); }
+.kpi-label { font-size: 13px; color: var(--text-3); margin-bottom: 8px; }
+.kpi-value { font-size: 32px; font-weight: 700; color: var(--text-1); }
+.kpi-unit { font-size: 14px; color: var(--text-2); margin-left: 4px; font-weight: 400; }
+.kpi-trend { font-size: 13px; margin-top: 8px; }
+.kpi-trend.up { color: var(--danger); }  /* 中国股市习惯：涨红 */
+.kpi-trend.down { color: var(--secondary); }
+
+/* Section 标题 */
+.section { margin-bottom: 40px; }
+.section-header {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 20px;
+}
+.section-num {
+  width: 32px; height: 32px;
+  background: var(--primary);
+  color: white;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 14px;
+}
+.section h2 { font-size: 22px; font-weight: 700; color: var(--text-1); }
+.section-sub { color: var(--text-3); font-size: 13px; margin-left: 8px; }
+
+/* 卡片 */
+.card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+}
+.card h3 {
+  font-size: 16px; font-weight: 600; margin-bottom: 16px;
+  display: flex; align-items: center; gap: 8px;
+}
+.card h3::before {
+  content: ""; width: 4px; height: 16px;
+  background: var(--primary); border-radius: 2px;
+}
+
+/* 三栏布局 */
+.three-col {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.industry-card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s;
+}
+.industry-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); }
+.industry-card .accent-bar {
+  position: absolute; top: 0; left: 0; right: 0; height: 4px;
+}
+.industry-card.local .accent-bar { background: linear-gradient(90deg, #0052D9, #5680E9); }
+.industry-card.medical .accent-bar { background: linear-gradient(90deg, #ED7B2F, #FFB774); }
+.industry-card.home .accent-bar { background: linear-gradient(90deg, #00A870, #4ECC9C); }
+.industry-card .ind-icon { font-size: 28px; margin-bottom: 8px; }
+.industry-card h4 { font-size: 18px; font-weight: 700; margin-bottom: 12px; }
+.industry-stat {
+  background: var(--bg);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+.industry-stat-label { font-size: 12px; color: var(--text-3); margin-bottom: 4px; }
+.industry-stat-value { font-size: 24px; font-weight: 700; color: var(--text-1); }
+.industry-stat-trend { font-size: 12px; margin-top: 4px; color: var(--danger); }
+.industry-card ul { list-style: none; padding: 0; }
+.industry-card ul li {
+  font-size: 13px; color: var(--text-2);
+  padding: 6px 0;
+  border-bottom: 1px dashed var(--border);
+  display: flex; gap: 6px;
+}
+.industry-card ul li:last-child { border-bottom: none; }
+.industry-card ul li .badge {
+  font-size: 10px; padding: 2px 6px;
+  background: var(--primary-light); color: var(--primary);
+  border-radius: 4px; font-weight: 600;
+  flex-shrink: 0; height: fit-content; margin-top: 2px;
+}
+.industry-card.medical ul li .badge { background: #FFF1E6; color: var(--accent); }
+.industry-card.home ul li .badge { background: #E6F7F0; color: var(--secondary); }
+
+/* 两栏布局 */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* 图表容器 */
+.chart-wrap {
+  position: relative;
+  height: 320px;
+}
+
+/* 表格 */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+th {
+  background: var(--bg);
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-2);
+  border-bottom: 2px solid var(--border);
+}
+td {
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-1);
+}
+tr:hover td { background: #FAFBFC; }
+.tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.tag-blue { background: var(--primary-light); color: var(--primary); }
+.tag-green { background: #E6F7F0; color: var(--secondary); }
+.tag-orange { background: #FFF1E6; color: var(--accent); }
+.tag-red { background: #FFE9EC; color: var(--danger); }
+
+/* 时间线 / 流程 */
+.flow {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin: 16px 0;
+}
+.flow-step {
+  flex: 1;
+  background: var(--bg);
+  padding: 16px;
+  text-align: center;
+  position: relative;
+  border-radius: 8px;
+  margin-right: 8px;
+}
+.flow-step:last-child { margin-right: 0; }
+.flow-step::after {
+  content: "→";
+  position: absolute;
+  right: -16px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  color: var(--primary);
+  font-weight: bold;
+  z-index: 1;
+}
+.flow-step:last-child::after { display: none; }
+.flow-step .step-num {
+  width: 24px; height: 24px;
+  background: var(--primary);
+  color: white; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 12px; margin-bottom: 8px;
+}
+.flow-step .step-title { font-weight: 600; font-size: 14px; }
+.flow-step .step-desc { font-size: 12px; color: var(--text-3); margin-top: 4px; }
+
+/* 问题块 */
+.question-block {
+  background: linear-gradient(135deg, #FFF8E1 0%, #FFFAF0 100%);
+  border-left: 4px solid var(--warning);
+  padding: 16px;
+  border-radius: 8px;
+  margin: 12px 0;
+}
+.question-block .q-label {
+  font-size: 12px; font-weight: 700;
+  color: var(--warning);
+  margin-bottom: 6px;
+}
+.question-block .q-text { font-size: 13px; color: var(--text-2); line-height: 1.7; }
+
+/* 支持需求列表 */
+.support-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 12px;
+}
+.support-item {
+  background: linear-gradient(135deg, #E7F1FF 0%, #F5F7FA 100%);
+  padding: 16px;
+  border-radius: 8px;
+  border-left: 3px solid var(--primary);
+}
+.support-item .num {
+  font-size: 24px; font-weight: 700; color: var(--primary);
+  margin-bottom: 4px;
+}
+.support-item .text { font-size: 13px; color: var(--text-2); line-height: 1.6; }
+
+/* AI 模块 */
+.ai-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 12px;
+}
+.ai-card {
+  background: linear-gradient(135deg, #F0F4FF 0%, #FFFFFF 100%);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+}
+.ai-card .ai-icon {
+  display: inline-flex;
+  width: 40px; height: 40px;
+  background: var(--primary);
+  color: white;
+  border-radius: 8px;
+  align-items: center; justify-content: center;
+  font-size: 18px; font-weight: bold;
+  margin-bottom: 12px;
+}
+.ai-card h4 { font-size: 15px; margin-bottom: 8px; }
+.ai-card p { font-size: 12px; color: var(--text-2); line-height: 1.6; }
+
+/* footer */
+.footer {
+  text-align: center;
+  padding: 24px;
+  color: var(--text-3);
+  font-size: 12px;
+  border-top: 1px solid var(--border);
+  margin-top: 40px;
+}
+
+@media (max-width: 900px) {
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .three-col, .two-col, .ai-grid, .support-list { grid-template-columns: 1fr; }
+  .hero h1 { font-size: 26px; }
+  .flow { flex-direction: column; }
+  .flow-step { margin-right: 0; margin-bottom: 24px; }
+  .flow-step::after { right: 50%; bottom: -20px; top: auto; transform: translateX(50%) rotate(90deg); }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-tag">📊 北区业务汇报 · 2026 Q2</div>
+    <h1>区域 K4 业务梳理</h1>
+    <p>围绕 Who（服务商生态）/ What（行渠联动）/ How（解决方案 & AI 赋能）三大维度，梳理 2026 年北区 K4 业务进展、关键打法与所需支持。</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><span class="icon">📅</span><span>更新时间：2026.05</span></div>
+      <div class="hero-meta-item"><span class="icon">🏢</span><span>覆盖范围：北区 13 省区</span></div>
+      <div class="hero-meta-item"><span class="icon">🎯</span><span>核心赛道：本地 / 消费医疗 / 家居</span></div>
+    </div>
+  </div>
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-label">代理汰换增速基准</div>
+      <div class="kpi-value">30<span class="kpi-unit">% YoY</span></div>
+      <div class="kpi-trend up">↑ 26 年唯一 benchmark</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">新增代理牌照</div>
+      <div class="kpi-value">22<span class="kpi-unit">家</span></div>
+      <div class="kpi-trend up">覆盖 13 个省区</div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label">季度预估增收</div>
+      <div class="kpi-value">3,600<span class="kpi-unit">万</span></div>
+      <div class="kpi-trend up">↑ 按门槛值预估</div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label">Q2 三大行业总日均目标</div>
+      <div class="kpi-value">2,610<span class="kpi-unit">万/日</span></div>
+      <div class="kpi-trend up">↑ 850 万 (+48%)</div>
+    </div>
+  </div>
+
+  <!-- 1. 业务进展 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <h2>业务进展</h2>
+      <span class="section-sub">Who · What · How 三维拆解</span>
+    </div>
+
+    <!-- 1.1 服务商生态 -->
+    <div class="card">
+      <h3>Who · 服务商 & 牌照管理</h3>
+      <p style="color: var(--text-2); font-size: 14px; margin-bottom: 16px;">
+        机制是否"自适应、有效"？不干预时能否正常新陈代谢？从代理赚钱的商业环境看，分工 / 竞争 / 利润规模 / 数量是否健康稳定？
+      </p>
+
+      <div class="two-col">
+        <div>
+          <h4 style="font-size: 14px; margin-bottom: 8px; color: var(--text-2);">① 存量代理汰换</h4>
+          <p style="font-size: 13px; color: var(--text-2); line-height: 1.8;">
+            开放生态推动，26 年以 <strong style="color: var(--danger);">30% 同比增速</strong>作为唯一 benchmark
+          </p>
+        </div>
+        <div>
+          <h4 style="font-size: 14px; margin-bottom: 8px; color: var(--text-2);">② 生态代理补位</h4>
+          <p style="font-size: 13px; color: var(--text-2); line-height: 1.8;">
+            依据行业需求拓展，补充存量代理对不同客群的服务需求
+          </p>
+        </div>
+      </div>
+
+      <h4 style="font-size: 14px; margin: 20px 0 12px;">新代理价值分类（22 家 / 13 省区 / 季度增收 3,600w）</h4>
+      <table>
+        <thead>
+          <tr>
+            <th>价值分类</th>
+            <th>省区</th>
+            <th>代理</th>
+            <th>核心增量赛道</th>
+            <th>预估增量</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="tag tag-blue">生态能力型</span></td>
+            <td>上海区</td>
+            <td>大材小用科技</td>
+            <td>本地-专业摄影服务</td>
+            <td><strong>300w</strong></td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-orange">竞媒资源型</span></td>
+            <td>京津区</td>
+            <td>掌跃顺为</td>
+            <td>医疗健康-口腔/医美<br>本地-丽人/综服/车后</td>
+            <td><strong>300w</strong></td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-orange">竞媒资源型</span></td>
+            <td>山东区</td>
+            <td>青岛大鹅儿</td>
+            <td>本地-政旅/二手物品回收/加盟</td>
+            <td><strong>100w</strong></td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-green">业务补位型</span></td>
+            <td>山东区</td>
+            <td>潍坊中润</td>
+            <td>医疗健康-专科/口腔</td>
+            <td><strong>100w</strong></td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-green">业务补位型</span></td>
+            <td>山东区</td>
+            <td>济南广善</td>
+            <td>本地-加盟/综服/丽人</td>
+            <td><strong>100w</strong></td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-green">业务补位型</span></td>
+            <td>冀豫区</td>
+            <td>郑州利是</td>
+            <td>医疗健康-医美/体检<br>本地-加盟</td>
+            <td><strong>100w</strong></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="question-block">
+        <div class="q-label">⚠️ 待讨论</div>
+        <div class="q-text">单一用业绩消耗达标作为考核标准，淘汰的代理未必不适合腾讯生态（如山东易搜、广东天擎天拓、福建微动），留下来的也未必适合（可能基数低）；新代理的消耗进展均较慢，很难达成考核门槛（100w / 300w）。</div>
+      </div>
+    </div>
+
+    <!-- 1.2 行渠联动 三大行业 -->
+    <div class="card">
+      <h3>What · Q2 区域业务提收核心项目</h3>
+      <p style="color: var(--text-2); font-size: 14px; margin-bottom: 16px;">
+        行业觉得哪些钱（增量）目前有机会拿进来；把这些钱拿进来，需要提供的解决方案是什么？
+      </p>
+
+      <div class="three-col">
+        <!-- 本地 -->
+        <div class="industry-card local">
+          <div class="accent-bar"></div>
+          <div class="ind-icon">🏪</div>
+          <h4>本地生活</h4>
+          <div class="industry-stat">
+            <div class="industry-stat-label">Q2 目标日均</div>
+            <div class="industry-stat-value">1,400<span style="font-size:14px;">万</span></div>
+            <div class="industry-stat-trend">↑ +500w (+56%)</div>
+          </div>
+          <ul>
+            <li><span class="badge">P0</span><span>聚合模式探索（到店/到家场景类机构撮合）</span></li>
+            <li><span class="badge">P0</span><span>生态小店孵化（直播/挂车/加热）</span></li>
+            <li><span class="badge">P1</span><span>链路运营提效（微信客服 + 企微）</span></li>
+          </ul>
+          <div style="margin-top: 12px; font-size: 12px; color: var(--text-3);">
+            <strong>重点：</strong>上海亦芯/微盟、福建云赢、京津微盟、广东厚拓、湖南琉璃河
+          </div>
+        </div>
+
+        <!-- 消费医疗 -->
+        <div class="industry-card medical">
+          <div class="accent-bar"></div>
+          <div class="ind-icon">🏥</div>
+          <h4>消费医疗</h4>
+          <div class="industry-stat">
+            <div class="industry-stat-label">Q2 目标日均</div>
+            <div class="industry-stat-value">850<span style="font-size:14px;">万</span></div>
+            <div class="industry-stat-trend">↑ +240w (+40%)</div>
+          </div>
+          <ul>
+            <li><span class="badge">P0</span><span>口腔地市提收（竞品二代名单方式）</span></li>
+            <li><span class="badge">P0</span><span>医美专项探索（IP内容 + 微盟孵化）</span></li>
+            <li><span class="badge">P1</span><span>品类拓展提收（新品 + 智投覆盖）</span></li>
+          </ul>
+          <div style="margin-top: 12px; font-size: 12px; color: var(--text-3);">
+            <strong>重点：</strong>上海微盟、江苏初见、浙江微盟、四川亦芯、广东天拓/云盟
+          </div>
+        </div>
+
+        <!-- 家居 -->
+        <div class="industry-card home">
+          <div class="accent-bar"></div>
+          <div class="ind-icon">🛋️</div>
+          <h4>家居家装</h4>
+          <div class="industry-stat">
+            <div class="industry-stat-label">Q2 目标日均</div>
+            <div class="industry-stat-value">360<span style="font-size:14px;">万</span></div>
+            <div class="industry-stat-trend">↑ +110w (+44%)</div>
+          </div>
+          <ul>
+            <li><span class="badge">P0</span><span>IP内容创新探索（聚合模式）</span></li>
+            <li><span class="badge">P0</span><span>直播链路提收（视频号流量）</span></li>
+            <li><span class="badge">P0</span><span>智能 BOT 渗透（小芯AI）</span></li>
+          </ul>
+          <div style="margin-top: 12px; font-size: 12px; color: var(--text-3);">
+            <strong>重点：</strong>上海亦芯、浙江微盟、江苏亦芯、广东我买家、京津亦芯
+          </div>
+        </div>
+      </div>
+
+      <!-- 图表 -->
+      <div class="two-col" style="margin-top: 24px;">
+        <div>
+          <h4 style="font-size: 14px; margin-bottom: 12px;">📊 三行业 Q2 目标对比</h4>
+          <div class="chart-wrap"><canvas id="chartTarget"></canvas></div>
+        </div>
+        <div>
+          <h4 style="font-size: 14px; margin-bottom: 12px;">📈 环比 Q1 增量分布</h4>
+          <div class="chart-wrap"><canvas id="chartGrowth"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1.3 重点赛道研究 -->
+    <div class="card">
+      <h3>区域重点赛道客户生意模式研究</h3>
+
+      <h4 style="margin: 16px 0 8px; font-size: 15px;">🏪 本地生活 — 聚合模式</h4>
+      <div class="flow">
+        <div class="flow-step">
+          <div class="step-num">1</div>
+          <div class="step-title">机构线下撮合</div>
+          <div class="step-desc">门店资源整合</div>
+        </div>
+        <div class="flow-step">
+          <div class="step-num">2</div>
+          <div class="step-title">机构线上投放</div>
+          <div class="step-desc">统一拿量能力</div>
+        </div>
+        <div class="flow-step">
+          <div class="step-num">3</div>
+          <div class="step-title">机构网销转化</div>
+          <div class="step-desc">线索精细运营</div>
+        </div>
+        <div class="flow-step">
+          <div class="step-num">4</div>
+          <div class="step-title">门店线下履约</div>
+          <div class="step-desc">交付保障</div>
+        </div>
+      </div>
+      <p style="font-size: 13px; color: var(--text-2); padding: 12px; background: var(--bg); border-radius: 8px;">
+        <strong>价值：</strong>把 SMB 商家预算收拢，提高投放拿量能力，解决单店体量小、冷启动难、留存差三大问题。<br>
+        <strong>聚焦赛道：</strong>摄影（婚摄市场总消耗 700w/日，H1 目标 50w → 70w）、家政三嫂（小熊美家、高阁）、丽人。
+      </p>
+
+      <h4 style="margin: 24px 0 8px; font-size: 15px;">🏥 消费医疗 — 口腔地市下沉</h4>
+      <div class="chart-wrap" style="height: 280px;"><canvas id="chartCity"></canvas></div>
+      <p style="font-size: 12px; color: var(--text-3); margin-top: 8px;">
+        <strong>目标地市画像：</strong>五线以上、地市常驻人口 &gt;100w、城镇人口密度 &gt;50%；
+        <strong>潜力客户画像：</strong>竞媒在投、牙医 2+、牙椅 3+、客服 2+、腾讯日预算 2000+
+      </p>
+      <p style="font-size: 13px; color: var(--text-2); padding: 12px; background: var(--bg); border-radius: 8px; margin-top: 12px;">
+        <strong>阶段性结果：</strong>25Q1 地市口腔平均日耗 102.9w，客户数 827；
+        <strong style="color: var(--danger);">26Q1 平均日耗 189.9w（YoY +84%）</strong>，客户数 928（YoY +12%）；
+        H1 计划：地市客户数 +30%（1,139 个），日耗目标 213w（YoY +72%）。
+      </p>
+
+      <h4 style="margin: 24px 0 8px; font-size: 15px;">🛋️ 家居家装 — 直播 + IP 内容生态</h4>
+      <div class="two-col">
+        <div style="background: var(--bg); padding: 16px; border-radius: 8px;">
+          <h5 style="font-size: 13px; margin-bottom: 8px;">K4 家居直播当前进展</h5>
+          <ul style="list-style: none; font-size: 13px; color: var(--text-2); line-height: 1.9;">
+            <li>📈 日均消耗 <strong style="color: var(--danger);">10w（环比 +33%）</strong>，峰值 14w</li>
+            <li>🎬 在投直播间 126 个，净增 17 个</li>
+            <li>✅ 送审通过率 76%，开播率 88%</li>
+            <li>🥇 上海区消耗 6w（占近 60%），亦芯 5w 领跑</li>
+          </ul>
+        </div>
+        <div style="background: var(--bg); padding: 16px; border-radius: 8px;">
+          <h5 style="font-size: 13px; margin-bottom: 8px;">IP 内容生态（科奕特克模式）</h5>
+          <ul style="list-style: none; font-size: 13px; color: var(--text-2); line-height: 1.9;">
+            <li>🎯 客群：年产值 3,000w-1亿 腰部装企</li>
+            <li>👥 团队：近 200 人（内容/投放/客服）</li>
+            <li>💰 字节累计消耗 8,000w+，腾讯 500w+</li>
+            <li>🚀 稳定投放 10+ 客户，单客户消耗 1-2k → 1-2w → 3-4w</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1.4 AI Empower -->
+    <div class="card">
+      <h3>How · AI Empower 区域前台业务</h3>
+      <p style="color: var(--text-2); font-size: 14px; margin-bottom: 16px;">
+        从 1.0（销运一体化）→ 2.0（生态代理补位 + AI 工具加持）的演进路径。
+      </p>
+
+      <div class="ai-grid">
+        <div class="ai-card">
+          <div class="ai-icon">🧱</div>
+          <h4>打地基 · 知识库</h4>
+          <p>FEJ 模型（事实/经验/判断），iwiki 北区空间分行业沉淀；本地、消费医疗、家居三大赛道已完成全量梳理。</p>
+        </div>
+        <div class="ai-card">
+          <div class="ai-icon">⚡</div>
+          <h4>提效率 · 工作流</h4>
+          <p>WorkBuddy 自动化加白、口腔地市看板、行渠联动 Agent；丽人 demo 已打通"知识共建 → 经理学习 → 服务商执行"。</p>
+        </div>
+        <div class="ai-card">
+          <div class="ai-icon">📈</div>
+          <h4>促增长 · 业务结果</h4>
+          <p>微盟 AI 拓客（4/14 充值 37w+）、亦芯小芯 AI（OG 427 高意向线索自动回传）、智能 BOT 线索打标。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 其他专项 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <h2>其他专项</h2>
+    </div>
+    <div class="two-col">
+      <div class="card">
+        <h3>品牌专项</h3>
+        <p style="font-size: 13px; color: var(--text-2);">区域品牌资产的指标及定义梳理，构建区域品牌资产评估体系。</p>
+      </div>
+      <div class="card">
+        <h3>素材专项</h3>
+        <ul style="list-style: none; font-size: 13px; color: var(--text-2); line-height: 2;">
+          <li>① <strong>消费医疗：</strong>医美医生 IP 类素材</li>
+          <li>② <strong>家装家居：</strong>素材打标及效果监控</li>
+          <li>③ <strong>本地生活：</strong>旅行社赛道互选类素材</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. 所需支持 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <h2>所需支持</h2>
+    </div>
+    <div class="card">
+      <div class="support-list">
+        <div class="support-item">
+          <div class="num">01</div>
+          <div class="text"><strong>存量代理牌照</strong>特殊情况报批，例：山东易搜</div>
+        </div>
+        <div class="support-item">
+          <div class="num">02</div>
+          <div class="text"><strong>关于方案的定义</strong>：穷举的必要性？有效性定义、方案开源、合伙人赋能</div>
+        </div>
+        <div class="support-item">
+          <div class="num">03</div>
+          <div class="text"><strong>成长中心 E 赋能设置</strong>当前的有效性，与行渠项目的绑定？</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    📄 报告基于《区域 K4 业务梳理》企微文档自动生成 · 2026.05.12
+  </div>
+</div>
+
+<script>
+// 中国习惯：涨红跌绿
+const RED = '#E34D59';
+const GREEN = '#00A870';
+const BLUE = '#0052D9';
+const ORANGE = '#ED7B2F';
+
+// Chart 1: 三行业 Q2 目标
+new Chart(document.getElementById('chartTarget'), {
+  type: 'bar',
+  data: {
+    labels: ['本地生活', '消费医疗', '家居家装'],
+    datasets: [
+      {
+        label: 'Q1 基准 (万/日)',
+        data: [900, 610, 250],
+        backgroundColor: 'rgba(0, 82, 217, 0.4)',
+        borderRadius: 6
+      },
+      {
+        label: 'Q2 目标 (万/日)',
+        data: [1400, 850, 360],
+        backgroundColor: RED,
+        borderRadius: 6
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { position: 'bottom', labels: { font: { size: 12 }}}},
+    scales: {
+      y: { beginAtZero: true, ticks: { callback: v => v + ' 万' }}
+    }
+  }
+});
+
+// Chart 2: 增量分布
+new Chart(document.getElementById('chartGrowth'), {
+  type: 'doughnut',
+  data: {
+    labels: ['本地生活 (+500w)', '消费医疗 (+240w)', '家居家装 (+110w)'],
+    datasets: [{
+      data: [500, 240, 110],
+      backgroundColor: [BLUE, ORANGE, GREEN],
+      borderWidth: 2,
+      borderColor: '#fff'
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom', labels: { font: { size: 12 }}},
+      tooltip: { callbacks: { label: ctx => ctx.label + ': ' + ctx.parsed + 'w/日' }}
+    },
+    cutout: '55%'
+  }
+});
+
+// Chart 3: 浙江口腔地市
+new Chart(document.getElementById('chartCity'), {
+  type: 'bar',
+  data: {
+    labels: ['宁波', '嘉兴', '金华', '温州', '台州'],
+    datasets: [
+      {
+        label: '日耗 (元)',
+        data: [91031, 26350, 31446, 19666, 15544],
+        backgroundColor: RED,
+        yAxisID: 'y',
+        borderRadius: 6
+      },
+      {
+        label: '广告主数',
+        type: 'line',
+        data: [20, 12, 15, 25, 14],
+        borderColor: BLUE,
+        backgroundColor: BLUE,
+        yAxisID: 'y1',
+        tension: 0.3,
+        pointRadius: 5,
+        pointHoverRadius: 7
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { position: 'bottom', labels: { font: { size: 12 }}}},
+    scales: {
+      y: { type: 'linear', position: 'left', beginAtZero: true, title: { display: true, text: '日耗 (元)' }},
+      y1: { type: 'linear', position: 'right', beginAtZero: true, title: { display: true, text: '广告主数' }, grid: { drawOnChartArea: false }}
+    }
+  }
+});
+</script>
+</body>
+</html>
