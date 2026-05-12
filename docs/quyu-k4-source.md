@@ -6,8 +6,9 @@
 ①存量代理汰换：开放生态的推动，26年以30%同比增速作为“唯一”benchmark
 Q：单一用业绩消耗达标作为考核标准，淘汰的代理未必是不适合腾讯生态（e.g. 山东-易搜，广东-天擎天拓，福建-微动），留下来的代理未必适合（可能是基数低，e.g. 冀豫区-大河传媒，东北-央企贝力等）
 https://doc.weixin.qq.com/sheet/e3_Ac4AyQa8APQCN1ChhbPYMTDOSwg13?scode=AJEAIQdfAAo8LPn0P1ADMAIQYjACg&tab=BB08J2 
+https://doc.weixin.qq.com/sheet/e3_ADMAIQYjACgCNwoxbau1NSLyljOG0?scode=AJEAIQdfAAodM8NVX1ADMAIQYjACg&tab=gdoet5 
 ②生态代理补位：依据行业需求拓展，补充当前存量代理对于不同客群的服务需求
-代理分类及价值：截止0410，市场申请区域K4框新增代理牌照数量共计22家，涉及13个省区，预计季度消耗增收3,600w（按照门槛值预估）。以北区为例，当前预计申请可成功代理6家，围绕生态能力填充、竞媒资源引入、省区业务补位三大块进行新代理布局，在存量代理业务提收前提下，差异性进行新代理对于新客户的拓展和孵化
+代理分类及价值：截止0410，市场申请区域K4框新增代理牌照数量共计22家，涉及13个省区有新增代理，预计新代理板块季度消耗增收3,600w（按照门槛值预估）。以北区为例，当前预计申请可成功代理6家，围绕生态能力填充、竞媒资源引入、省区业务补位三大块进行新代理布局，在存量代理业务提收前提下，差异性进行新代理对于新客户的拓展和孵化
 价值分类	涉及省区	代理集团名称	核心业务能力	核心增量赛道	预估增量
 生态能力型	上海区	上海大材小用科技有限公司	垂直行业代运营能力
 垂直行业拓客能力	本地-专业摄影服务	300w
@@ -263,6 +264,7 @@ https://doc.weixin.qq.com/doc/w3_AVkAuAaSADMCNjCC99I2FQ0W047vo?scode=AJEAIQdfAAo
 https://drive.weixin.qq.com/s?k=AJEAIQdfAAoIjJ0LKYAdcArgaoABk 	
 附录：北区业务前台skill hub建设
 
+
 2.其他专项
 1）品牌专项：区域品牌资产的指标及定义？
 https://doc.weixin.qq.com/doc/w3_AGIAxQYXACoCNJiomAZKlSJ0Q0RKp?scode=AJEAIQdfAAo11UlPu1ADMAIQYjACg 
@@ -273,7 +275,13 @@ https://doc.weixin.qq.com/doc/w3_AGIAxQYXACoCN6UyRTJJuQKqZYmi0?scode=AJEAIQdfAAo
 ③本地生活：本地生活旅行社赛道互选类素材？
 https://doc.weixin.qq.com/sheet/e3_ALcAYAZ2ACcCNZG2FPRz7T1ueIk8C?scode=AJEAIQdfAAoQ6Jp5TZADMAIQYjACg&tab=qnj95d 
 
-3.所需支持
+3.人员发展
+1）运作机制：轻管理、重赋能；管理工具化、赋能行业化
+2）人员汰换：末尾人员（维青、刘燕、赵宁、张磊、lijie）
+3）骨干培养：张芳-生态代理协同；方依-区域业务工具化赋能；淑明/嘉璐/inger-行业化赋能；新人培养-祎轩+招聘新人
+
+4.所需支持
 1）存量代理牌照特殊情况报批，e.g. 山东易搜
 2）关于方案的定义，穷举的必要性？有效性定义、方案开源、如何进行合伙人赋能
 3）成长中心E赋能设置的当前有效性，与行渠项目的绑定？
+4）对于组内人员考核的明确，五星员工的定义？业绩的重要性？AI 的
